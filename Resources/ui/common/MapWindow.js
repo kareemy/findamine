@@ -292,7 +292,12 @@ function MapWindow(tab) {
 				width: '100%',
 				height: '50dp',
 				bottom: 0,
-				backgroundColor: 'black'
+				backgroundGradient: {
+           			type: 'linear',
+            		startPoint: { x: '0%', y: '0%' },
+            		endPoint: { x: '0%', y: '100%' },
+            		colors: [ { color: '#3366FF', offset: 0.0}, {color: '#002EB8', offset: 1.0} ],
+        		}
 			});
 			var subView = Ti.UI.createView({
 				layout: 'horizontal',
