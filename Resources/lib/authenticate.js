@@ -17,26 +17,12 @@ exports.login = function(username, password) {
 	Ti.API.info("login: Attempting to login " + username + " with password '" + password + "'");
 	if (exports.isLoggedIn()) {
 		Ti.API.info("login(): Already logged in.");
-		return true;
+		return;
 	}
 	
-	//FIXME: Perform API call here
-	var loggedIn = true;
-	if (!loggedIn) {
-		Ti.API.info("login(): login failed.")
-		return false;
-	}
-	
-	var start = new Date().getTime();
-	while ((new Date().getTime() - start) < 2000) {
-		
-	}
-	
-	Ti.API.info("login(): login success.");
-	Ti.App.Properties.setString("username", username);
-	Ti.App.Properties.setString("password", password);
-	Ti.App.Properties.setBool("loggedIn", true);
-	return true;
+	var api = require('lib/api');
+	api.authenticate(username, password);
+	return;
 };
 
 exports.logout = function() {
@@ -46,7 +32,8 @@ exports.logout = function() {
 
 	Ti.App.Properties.setBool("loggedIn", false);
 	Ti.App.Properties.removeProperty("username");
-	Ti.App.Properties.removeProperty("password");
+	Ti.App.Properties.removeProperty("hashedPassword");
+	Ti.App.Properties.removeProperty("gameID");
 	return true;
 }
 
@@ -62,13 +49,13 @@ exports.getUserName = function() {
 	return '';
 }
 
-exports.getPassword = function() {
+exports.getHashedPassword = function() {
 	if (!exports.isLoggedIn()) {
 		return '';
 	}
 	
-	if (Ti.App.Properties.hasProperty("password")) {
-		return Ti.App.Properties.getString("password");
+	if (Ti.App.Properties.hasProperty("hashedPassword")) {
+		return Ti.App.Properties.getString("hashedPassword");
 	}
 
 	return '';

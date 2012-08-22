@@ -82,12 +82,36 @@ function LoginWindow() {
 	self.add(button);
 	self.add(actInd);
 	
+	Ti.App.addEventListener('apiAuthenticate', function(e) {
+		Ti.API.info("LoginWindow(): Got apiAuthenticate result: " + e.value);
+		if (e.value == 0) {
+			Ti.API.info("LoginWindow(): Login success. Firing loggedIn event.");
+			Ti.App.fireEvent('loggedIn');
+			actInd.hide();
+			self.close();
+		} else {
+			if (e.value == 1) {
+				Ti.API.info("LoginWindow(): Login failed.");
+				alert("Invalid username or password. Please try again.");
+			} else if (e.value == 2) {
+				Ti.API.info("LoginWindow(): Network error. Please try again later.");
+				alert("Network error. Please try again later.");
+			} else {
+				Ti.API.info("LoginWindow(): Unknown error. Please try again later.")
+				alert("Unknown error. Please try again later.");
+			}
+			actInd.hide();
+			button.show();
+		} 
+	});
+	
 	button.addEventListener('click', function() {
 		var authenticate = require('/lib/authenticate');
 		button.hide();
 		actInd.show();
 		if (android) actInd.message = "Logging in...";
-
+		authenticate.login(username_tf.value, password_tf.value);
+		/*
 		if (authenticate.login(username_tf.value, password_tf.value)) {
 			Ti.API.info("LoginWindow(): Login success. Firing loggedIn event.");
 			Ti.App.fireEvent('loggedIn');
@@ -99,6 +123,7 @@ function LoginWindow() {
 			actInd.hide();
 			button.show();
 		}
+		*/
 	});
 	
 	return self;

@@ -68,37 +68,40 @@ function SetupSelectHuntWindow()
 	actInd.show();
 	if (android) actInd.message = "Searching for hunts...";
 	
-	var hunts = db.getAvailableHunts();
-	Ti.API.info("SetupSelectHuntWindow(): Available Hunts: ");
-	Ti.API.info(hunts);
+	db.getAvailableHunts();
+	Ti.App.addEventListener("gotHunts", function(e) {
+		Ti.API.info("SetupSelectHuntWindow(): Available Hunts: ");
+		var hunts = e.data;
+		Ti.API.info(hunts);
 	
-	var activeHunt = db.getActiveHunt();
+		var activeHunt = db.getActiveHunt();
 	
-	if (hunts.length == 0) {
+		if (hunts.length == 0) {
+			actInd.hide();
+			topLabel.text = "Sorry no hunts available. Please check back later.";
+			topLabel.show();
+			return;
+		} 
+	
+		var activeRow = 0;
+		for (var i = 0; i < hunts.length; i++) {
+			var row = Ti.UI.createPickerRow({
+				title:hunts[i]['description'],
+				huntid:hunts[i]['id'],
+				starttime:hunts[i]['starttime'],
+				endtime:hunts[i]['endtime']
+			});
+			huntPicker.add(row);
+			if (hunts[i]['id'] == activeHunt) activeRow = i;
+		}
+		huntPicker.selectionIndicator = true;
+		huntPicker.setSelectedRow(0,activeRow,true);
+		bottomLabel.text = "Selected Hunt: " + hunts[activeRow]['description'] + "\nEnds: " + hunts[activeRow]['endtime'] + "\n\nSwitch to the Map tab to start this hunt.";
+		db.setActiveHunt(hunts[activeRow]['id']);
+	
 		actInd.hide();
-		topLabel.text = "Sorry no hunts available. Please check back later.";
-		topLabel.show();
-		return;
-	} 
-	
-	var activeRow = 0;
-	for (var i = 0; i < hunts.length; i++) {
-		var row = Ti.UI.createPickerRow({
-			title:hunts[i]['description'],
-			huntid:hunts[i]['id'],
-			starttime:hunts[i]['starttime'],
-			endtime:hunts[i]['endtime']
-		});
-		huntPicker.add(row);
-		if (hunts[i]['id'] == activeHunt) activeRow = i;
-	}
-	huntPicker.selectionIndicator = true;
-	huntPicker.setSelectedRow(0,activeRow,true);
-	bottomLabel.text = "Selected Hunt: " + hunts[activeRow]['description'] + "\nEnds: " + hunts[activeRow]['endtime'] + "\n\nSwitch to the Map tab to start this hunt.";
-	db.setActiveHunt(hunts[activeRow]['id']);
-	
-	actInd.hide();
-	self.add(huntPicker);
+		self.add(huntPicker);
+	});
 }
 
 function SelectHuntWindow() {

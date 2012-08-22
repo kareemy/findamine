@@ -17,7 +17,7 @@ function updateDatabase(oldDbVersion)
 function createDatabase()
 {
 	var db = Titanium.Database.open(dbName);
-	
+	// FIXME: ResearchQuestion ORDER QuestionOrder
 	// There is no DATETIME data type in SQLite. We can use STRING, INTEGER, or REAL for dates. I chose to use INTEGER.
 	db.execute('CREATE TABLE IF NOT EXISTS Hunt (id INTEGER PRIMARY KEY, Description TEXT, ActivationTime INTEGER, ExpirationTime INTEGER, StartTime INTEGER, SolvedTime INTEGER, Solved INTEGER, Picture BLOB)');
 	db.execute('CREATE TABLE IF NOT EXISTS Clue (id INTEGER PRIMARY KEY, HuntId INTEGER, Description TEXT, ClueOrder INTEGER, Latitude REAL, Longitude REAL, StartTime INTEGER, SolvedTime INTEGER, Solved INTEGER)');
@@ -47,6 +47,68 @@ function insertDummyData()
 	db.close();
 }
 
+function addHuntsToDB(jsonHuntArray)
+{
+	Ti.API.info("addHuntsToDB(): Adding Hunts to local database.")
+	var db = Titanium.Database.open(dbName);
+	for (var i = 0; i < jsonHuntArray.length; i++) {
+		// FIXME: Validate hunt values.
+		var hunt = {id: jsonHuntArray[i].Hunt_ID, 
+					Description: jsonHuntArray[i].Hunt_name, 
+					ActivationTime: jsonHuntArray[i].Hunt_start_date, 
+					ExpirationTime: jsonHuntArray[i].Hunt_end_date
+				   	};
+		// FIXME: Make sure hunt does not already exist in database. If it does, update???
+		var jsonClueArray = jsonHuntArray[i].Hunt_clues;
+		if (jsonClueArray.length == 0) {
+			Ti.API.info("addHuntsToDB(): Hunt " + hunt.id + " has no clues. Skipping.");
+			continue;
+		}
+		for (var j = 0; j < jsonClueArray.length; j++) {
+			// FIXME: Validate clue values.
+			var clue = {id: jsonClueArray[j].Clue_ID, 
+						Description: jsonClueArray[j].Clue_text, 
+						ClueOrder: jsonClueArray[j].Clue_order, 
+						latitude: jsonClueArray[j].Clue_location_latitude, 
+						longitude: jsonClueArray[j].Clue_location_longitude
+						};
+			var jsonQuestionArray = jsonClueArray[j].Clue_questions;
+			for (var k = 0; k < jsonQuestionArray.length; k++) {
+				// FIXME: Validate question values.
+				var question = {id: jsonQuestionArray[k].Question_ID,
+								QuestionText: jsonQuestionArray[k].Question_text,
+								QuestionOrder: jsonQuestionArray[k].Question_order,
+								QuestionType: jsonQuestionArray[k].Question_type
+								};
+				// FIXME: Insert/Update?? question into database
+			}
+			// FIXME: Insert/Update?? clue into database
+		}
+		// FIXME: Insert/Update?? hunt into database
+	}
+	db.close();
+}
+function getHuntsFromDB()
+{
+	var db = Titanium.Database.open(dbName);
+	
+	var resultSet = db.execute("SELECT id, Description, ActivationTime, ExpirationTime from Hunt Where ActivationTime < date('now') and ExpirationTime > date('now')");
+	var results = [];
+	while (resultSet.isValidRow()) {
+		results.push({
+			id: resultSet.fieldByName('id'),
+			description: resultSet.fieldByName('Description'),
+			starttime: resultSet.fieldByName('ActivationTime'),
+			endtime: resultSet.fieldByName('ExpirationTime')
+		});
+		resultSet.next();	
+	}
+
+	resultSet.close();
+	db.close();
+	return results;
+}
+
 exports.setupDatabase = function() 
 {
 	if (Ti.App.Properties.hasProperty("dbVersion")) {
@@ -66,23 +128,17 @@ exports.setupDatabase = function()
 
 exports.getAvailableHunts = function()
 {
-	var db = Titanium.Database.open(dbName);
-	
-	var resultSet = db.execute("SELECT id, Description, ActivationTime, ExpirationTime from Hunt Where ActivationTime < date('now') and ExpirationTime > date('now')");
-	var results = [];
-	while (resultSet.isValidRow()) {
-		results.push({
-			id: resultSet.fieldByName('id'),
-			description: resultSet.fieldByName('Description'),
-			starttime: resultSet.fieldByName('ActivationTime'),
-			endtime: resultSet.fieldByName('ExpirationTime')
-		});
-		resultSet.next();	
-	}
-
-	resultSet.close();
-	db.close();
-	return results;
+	Ti.API.info("getAvailableHunts(): Getting available hunts from web service.");
+	var api = require('lib/api');
+	Ti.App.addEventListener("GotHuntsFromWebService", function(e) {
+		// FIXME: Pass error back to SelectHunt window
+		if (e.error == 0) {
+			addHuntsToDB(e.data);
+		}
+		hunts = getHuntsFromDB();
+		Ti.App.fireEvent("GotHunts", {data: hunts});
+	})
+	api.getAvailableHunts();
 };
 
 exports.startHunt = function(huntid)
