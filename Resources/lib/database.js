@@ -58,7 +58,10 @@ function addHuntsToDB(jsonHuntArray)
 					ActivationTime: jsonHuntArray[i].Hunt_start_date, 
 					ExpirationTime: jsonHuntArray[i].Hunt_end_date
 				   	};
-		// FIXME: Make sure hunt does not already exist in database. If it does, update???
+		var rows = db.execute('SELECT id FROM Hunt WHERE id=?', hunt.id);
+		if (rows.rowCount == 1) {
+			// Hunt already exists. FIXME: What should we do?
+		}
 		var jsonClueArray = jsonHuntArray[i].Hunt_clues;
 		if (jsonClueArray.length == 0) {
 			Ti.API.info("addHuntsToDB(): Hunt " + hunt.id + " has no clues. Skipping.");
@@ -88,6 +91,7 @@ function addHuntsToDB(jsonHuntArray)
 	}
 	db.close();
 }
+
 function getHuntsFromDB()
 {
 	var db = Titanium.Database.open(dbName);
