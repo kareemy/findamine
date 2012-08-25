@@ -8,23 +8,13 @@ function SettingsWindow(title) {
 		backgroundColor:'white'
 	});
 	
-	var button = Ti.UI.createButton({
-		height:44,
-		width:200,
-		title:L('openWindow'),
-		top:20
+	var label = Ti.UI.createLabel({
+		top: 0,
+		width:'320dp',
+		height:'auto',
+		text: 'There are no settings to change yet.\n\n\n This application is developed at West Texas A&M University (www.wtamu.edu).\n Certain icons created by Glyphish (glyphish.com).'
 	});
-	self.add(button);
-	
-	button.addEventListener('click', function() {
-		//containingTab attribute must be set by parent tab group on
-		//the window for this work
-		self.containingTab.open(Ti.UI.createWindow({
-			title: L('newWindow'),
-			backgroundColor: 'white'
-		}));
-	});
-	
+	self.add(label);
 	return self;
 };
 

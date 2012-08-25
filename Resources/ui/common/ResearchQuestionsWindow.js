@@ -5,7 +5,7 @@ Ti.include("/lib/version.js");
 
 function ResearchQuestionsWindow() {
 	Ti.API.info("ResearchQuestionsWindow(): Creating New Research Questions window.");
-	
+	// FIXME: Handle heights better
 	var self = Ti.UI.createWindow({
 		title:"Research Questions",
 		backgroundColor:'white',
@@ -24,7 +24,7 @@ function ResearchQuestionsWindow() {
 		backgroundColor:'white',
 		borderRadius:0,
 		width:'auto',
-		height:'500dp',
+		height:'1000dp',
 		top:0
 	});
 	
@@ -40,7 +40,7 @@ function ResearchQuestionsWindow() {
 	view.add(button);
 	
 	button.addEventListener('click', function() {
-		//FIXME: Save answers here
+		Ti.App.fireEvent("researchQuestionsSubmitted");
 		self.close();
 	});
 	

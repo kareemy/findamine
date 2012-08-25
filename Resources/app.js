@@ -45,16 +45,22 @@ if (Ti.version < 1.8 ) {
 		Window = require('ui/handheld/ApplicationWindow');
 	}
 	*/
+	var authenticate = require('lib/authenticate');
 	
 	Ti.App.addEventListener("pause", function() {
-		// FIXME: Upload location data here
 		Ti.API.info("app.js main(): Application Entered Background.");
+		if (authenticate.isLoggedIn()) {
+			var currentClue = db.getCurrentClue();
+			if (currentClue.hasOwnProperty('id')) {
+				db.uploadClueData(currentClue.id, false);
+			}
+			db.retryUploads();
+		}
 	});
 	
 	var ApplicationTabGroup = require('ui/common/ApplicationTabGroup');
 	new ApplicationTabGroup().open();
 	
-	var authenticate = require('lib/authenticate');
 	if (!authenticate.isLoggedIn()) {
 		Ti.API.info("app.js main(): User is not logged in. Showing modal login window.");
 		var LoginWindow = require('ui/common/LoginWindow');

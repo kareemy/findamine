@@ -3,7 +3,66 @@
  */
 
 var self;
+var huntPicker, topLabel, bottomLabel, actInd;
+
 Ti.include("/lib/version.js");
+
+function ForceHuntRefresh()
+{
+	var db = require('lib/database');
+	huntPicker.hide();
+	actInd.show();
+	db.getAvailableHunts();
+}
+
+function RefreshHuntPicker(e)
+{
+	Ti.API.info("RefreshHuntPicker(): Available Hunts: ");
+	var db = require('lib/database');
+	var hunts = e.data;
+	Ti.API.info(hunts);
+	
+	var activeHunt = db.getActiveHunt();
+	
+	if (hunts.length == 0) {
+		actInd.hide();
+		topLabel.text = "Sorry no hunts available. Please check back later.";
+		topLabel.show();
+		if (e.error != 0) {
+			alert("There was an error trying to retrieve the hunts. Please try again later.")
+		}
+		return;
+	} 
+	
+	if (huntPicker.columns[0]) {
+		var _col = huntPicker.columns[0];
+		var len = _col.rowCount;
+		for (var x = len-1; x >= 0; x--) {
+			var _row = _col.rows[x];
+			_col.removeRow(_row);
+		}
+	}
+	
+	var activeRow = 0;
+	for (var i = 0; i < hunts.length; i++) {
+		var row = Ti.UI.createPickerRow({
+			title:hunts[i]['description'],
+			huntid:hunts[i]['id'],
+			starttime:hunts[i]['starttime'],
+			endtime:hunts[i]['endtime']
+		});
+		huntPicker.add(row);
+		if (hunts[i]['id'] == activeHunt) activeRow = i;
+	}
+	
+	huntPicker.selectionIndicator = true;
+	huntPicker.setSelectedRow(0,activeRow,true);
+	bottomLabel.text = "Selected Hunt: " + hunts[activeRow]['description'] + "\nEnds: " + hunts[activeRow]['endtime'] + "\n\nSwitch to the Map tab to start this hunt.";
+	db.setActiveHunt(hunts[activeRow]['id']);
+	
+	actInd.hide();
+	huntPicker.show();
+}
 
 function SetupSelectHuntWindow()
 {
@@ -16,7 +75,7 @@ function SetupSelectHuntWindow()
 		return;
 	}
 	
-	var topLabel = Titanium.UI.createLabel({
+	topLabel = Titanium.UI.createLabel({
 		color: '#000',			
 		top:'10dp',
 		left:'10dp',
@@ -24,7 +83,7 @@ function SetupSelectHuntWindow()
 		visible: false
 	});	
 	
-	var bottomLabel = Titanium.UI.createLabel({
+	bottomLabel = Titanium.UI.createLabel({
 		color: '#000',
 		top: '220dp',
 		width: 'auto',
@@ -34,7 +93,6 @@ function SetupSelectHuntWindow()
 	self.add(topLabel);
 	self.add(bottomLabel);
 	
-	var actInd;
 	if (android) {
 		actInd = Titanium.UI.createActivityIndicator({
 			bottom:10, 
@@ -54,9 +112,11 @@ function SetupSelectHuntWindow()
 		});
 	}
 	
-	var huntPicker = Titanium.UI.createPicker({
-		top:0
+	huntPicker = Titanium.UI.createPicker({
+		top:0,
+		visible: false
 	});
+	self.add(huntPicker);
 	
 	huntPicker.addEventListener('change',function(e)
 	{
@@ -67,41 +127,8 @@ function SetupSelectHuntWindow()
 	self.add(actInd);
 	actInd.show();
 	if (android) actInd.message = "Searching for hunts...";
-	
+	Ti.App.addEventListener("GotHunts", RefreshHuntPicker);
 	db.getAvailableHunts();
-	Ti.App.addEventListener("gotHunts", function(e) {
-		Ti.API.info("SetupSelectHuntWindow(): Available Hunts: ");
-		var hunts = e.data;
-		Ti.API.info(hunts);
-	
-		var activeHunt = db.getActiveHunt();
-	
-		if (hunts.length == 0) {
-			actInd.hide();
-			topLabel.text = "Sorry no hunts available. Please check back later.";
-			topLabel.show();
-			return;
-		} 
-	
-		var activeRow = 0;
-		for (var i = 0; i < hunts.length; i++) {
-			var row = Ti.UI.createPickerRow({
-				title:hunts[i]['description'],
-				huntid:hunts[i]['id'],
-				starttime:hunts[i]['starttime'],
-				endtime:hunts[i]['endtime']
-			});
-			huntPicker.add(row);
-			if (hunts[i]['id'] == activeHunt) activeRow = i;
-		}
-		huntPicker.selectionIndicator = true;
-		huntPicker.setSelectedRow(0,activeRow,true);
-		bottomLabel.text = "Selected Hunt: " + hunts[activeRow]['description'] + "\nEnds: " + hunts[activeRow]['endtime'] + "\n\nSwitch to the Map tab to start this hunt.";
-		db.setActiveHunt(hunts[activeRow]['id']);
-	
-		actInd.hide();
-		self.add(huntPicker);
-	});
 }
 
 function SelectHuntWindow() {
@@ -118,7 +145,13 @@ function SelectHuntWindow() {
 	} else {
 		SetupSelectHuntWindow();
 	}
-
+	
+	Ti.App.addEventListener('forceHuntRefresh', ForceHuntRefresh)
+	Ti.App.addEventListener('resume', function() {
+		Ti.API.info("App Resumed. Checking if new hunts available");
+		ForceHuntRefresh();
+	});
+	
 	return self;
 };
 

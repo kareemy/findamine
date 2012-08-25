@@ -11,6 +11,7 @@ var ResearchQuestionsWindow, rqWindow, rqView, rqSubmitButton;
 var sliderValues = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
 var android_toolbar_setup = false;
 var answeredResearchQuestions = false;
+var currentClue;
 
 Ti.include("/lib/version.js");
 
@@ -21,8 +22,10 @@ function updateResearchQuestions()
 	if (rqArray.length == 0) {
 		return;
 	}
-	var tempTop = 110 * rqArray.length + 15;
+	// FIXME: Handle heights better
+	var tempTop = 130 * rqArray.length + 15;
 	rqSubmitButton.top = tempTop + 'dp';
+	rqView.height = tempTop + 100;
 	var labels = [];
 	var children = rqView.getChildren();
 	for (var i = 0; i < children.length; i++) {
@@ -31,16 +34,29 @@ function updateResearchQuestions()
 	}
 	
 	for (var i = 0; i < rqArray.length; i++) {
-		var top = 110*i;
+		var top = 130*i;
+		if (i > 0) {
+			var hr = Titanium.UI.createView({
+				width: '100%',
+				height: 1,
+				borderWidth: 1,
+				borderColor: "black",
+				top:top
+			});
+			rqView.add(hr);
+			top = top + 1;
+		}
 		var questionLabel = Titanium.UI.createLabel({
 			text: rqArray[i].questiontext,
 			height:75,
 			width:'auto',
+			font: {fontSize: 14},
 			top:top + 'dp'
 		});
 		rqView.add(questionLabel);
 		var slider;
-		if (rqArray[i].questiontype == 1) {
+		// FIXME: Handle question types properly
+		//if (rqArray[i].questiontype == 1) {
 			tempTop = top+80;
 			labels[i] = Titanium.UI.createLabel({
 				text:'Neutral',
@@ -61,17 +77,25 @@ function updateResearchQuestions()
 			slider.addEventListener('change', function(e) {
 				if (Math.round(e.value) != e.source.oldvalue) {
 					Ti.API.info("slider " + e.source.id + " has a value of " + Math.round(e.value));
-					db.saveResearchQuestion(e.source.id, Math.round(e.value));
+					db.saveResearchQuestion(e.source.id, sliderValues[Math.round(e.value)-1]);
 					e.source.oldvalue = Math.round(e.value);
 					labels[e.source.labelid].text = sliderValues[Math.round(e.value)-1];
 				}
 			});
 			rqView.add(labels[i]);
 			rqView.add(slider);
-		}
+		//}
 	}
-	rqWindow.open();
+
+	Ti.App.addEventListener("researchQuestionsSubmitted", function(e) {
+		db.startClue(clue.id);
+		db.uploadClueData(clue.id, false);
+		Ti.API.info("height: ", clueLabel.size.height);
+		var newHeight = clueLabel.size.height;
+		backgroundLabel.height = newHeight + 'dp';
+	});
 	
+	rqWindow.open();
 };
 
 function fireUpTheCamera() {
@@ -82,19 +106,17 @@ function fireUpTheCamera() {
 			var cropRect = event.cropRect;
 			var image = event.media;
 	
-			Ti.API.debug('Our type was: '+event.mediaType);
+			Ti.API.info('fireUpTheCamera(): Successfully took picture. Our type was: '+event.mediaType);
 			if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
 			{
 				// FIXME: Verify that camera operation works and it saves image properly
 				Ti.API.info("Got picture. Finishing hunt and saving image");
-				var imgV = Titanium.UI.createImageView({
-					image:image,
-    				width:375, //768x1024 proportionally scales to 480x640, 375x500, 240x320, 180x240
-    				height:500 //240x320 for CoverFlow? 
-				});      
-				//image = imgV.toImage().media;
-				image = imgV.toImage();
-				db.finishHunt(clue.huntid, image);
+				Ti.API.info("Picture size: " + image.width + "x" + image.height);
+				var maxsize = Math.max(image.width, image.height);
+				var multiplier = (maxsize / 400) + 1;
+				var resizedImage = image.imageAsResized(image.width / multiplier, image.height / multipler);
+				db.finishHunt(clue.OnlineId, clue.huntid, resizedImage);
+				Ti.App.fireEvent('forceHuntRefresh');
 				tabGroup.setActiveTab(0); // Go back to SelectHunt tab
 				/*
 				var imageView = Ti.UI.createImageView({
@@ -149,12 +171,14 @@ function distance(lat1, lon1, lat2, lon2)
 function switchToNewClue() {
 	updateResearchQuestions();
 	clueLabel.text = clue['description'];
+	currentClue = clue.id;
 	Ti.API.info("switchToNewClue(): debug? " + debug);
 	if (debug) {
 		var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
 		clueLabel.text = clueLabel.text + "\nlat: " + Math.floor(currentLocation.latitude * 1000) / 1000 
 							+ " lon: " + Math.floor(currentLocation.longitude * 1000) / 1000 
 							+ " acc: " + currentLocation.accuracy + "m d: " + Math.floor(d * 1000) / 1000 + "m";
+		//newHeight += 40;
 	}
 }
 
@@ -200,7 +224,9 @@ function updateMapWindow() {
 		d = 10; // FIXME: Delete this
 		if (d < 100) {
 			// Found it
+			currentClue = -1;
 			db.finishClue(clue.id);
+			db.uploadClueData(clue.id, true);
 			clue = db.getCurrentClue();
 			if (clue.length == 0) {
 				// Final clue show camera
@@ -253,7 +279,8 @@ function MapWindow(tab) {
 	rqWindow = blah[0];
 	rqView = blah[1];
 	rqSubmitButton = blah[2];
-
+	currentClue = -1;
+	
 	function translateErrorCode(code) {
 		if (code == null) {
 			return null;
@@ -327,13 +354,15 @@ function MapWindow(tab) {
 	});
 	clueLabel = Titanium.UI.createLabel({
 		top:0,
+		height:'auto',
 		width:'320dp',
 		color:'white',
+		font:{fontSize: 16},
 		text:'Please select a new hunt. No clues available.'
 	});
 	
     mapview = Titanium.Map.createView({
-        mapType: Titanium.Map.STANDARD_TYPE,
+        mapType: Titanium.Map.HYBRID_TYPE,
         region: {latitude:33.74511, longitude:-84.38993, 
                 latitudeDelta:0.01, longitudeDelta:0.01},
         animate:true,
@@ -361,12 +390,16 @@ function MapWindow(tab) {
 			var latitude = e.coords.latitude;
 			var accuracy = e.coords.accuracy;
 			var timestamp = e.coords.timestamp;
-			Ti.API.info("Location Updated: latitude: " + latitude + " longitude: " + longitude + " accuracy: " + accuracy);
+			Ti.API.info("Location Updated: latitude: " + latitude + " longitude: " + longitude + " accuracy: " + accuracy + " ts: " + timestamp);
 			if (firstlocation == false) {
 				mapview.region = {latitude:latitude, longitude:longitude,latitudeDelta:0.01, longitudeDelta:0.01};
 				firstlocation = true;
 			}
 			currentLocation = {latitude:latitude, longitude:longitude, accuracy:accuracy, timestamp:timestamp};
+			Ti.API.info("currentClue: " + currentClue);
+			if (currentClue != -1) {
+				db.saveLocation(currentClue, currentLocation);
+			}
 	};
 	
 	Titanium.Geolocation.addEventListener('location', locationCallback);
