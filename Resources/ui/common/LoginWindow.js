@@ -9,7 +9,9 @@ function LoginWindow() {
 	var self = Ti.UI.createWindow({
 		modal: true,
 		title:"Find-a-mine Login",
-		backgroundColor:'White'
+		backgroundColor:'White',
+		layout:'vertical',
+		exitOnClose:true
 	});
 	
 	var label_f = Titanium.UI.createLabel({
@@ -17,14 +19,14 @@ function LoginWindow() {
 		text: 'Welcome to Find-a-mine! Please visit http://www.findamine.mobi to sign up and enter your username and password below to get started.',
 		top:'10dp',
 		left:'10dp',
-		width:'auto'
+		right:'10dp'
 	});
 	
 	var username_tf = Titanium.UI.createTextField({
 		color:'#336699',
-		height:'35dp',
-		top:'110dp',
-		left:'10dp',
+		height:(android) ? '45dp' : 35,
+		top:'15dp',
+		//left:'10dp',
 		width:'250dp',
 		keyboardType:Titanium.UI.KEYBOARD_DEFAULT,
 		returnKeyType:Titanium.UI.RETURNKEY_DEFAULT,
@@ -36,9 +38,9 @@ function LoginWindow() {
 	
 	var password_tf = Titanium.UI.createTextField({
 		color:'#336699',
-		height:'35dp',
-		top:'155dp',
-		left:'10dp',
+		height:(android) ? '45dp' : 35,
+		top:'15dp',
+		//left:'10dp',
 		width:'250dp',
 		keyboardType:Titanium.UI.KEYBOARD_DEFAULT,
 		returnKeyType:Titanium.UI.RETURNKEY_DEFAULT,
@@ -53,7 +55,7 @@ function LoginWindow() {
 		height:'44dp',
 		width:'200dp',
 		title:"Login",
-		top:'210dp'
+		top:'15dp'
 	});
 	
 	var actInd;
