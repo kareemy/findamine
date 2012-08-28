@@ -8,7 +8,7 @@ var clue = [];
 var currentLocation;
 var tabGroup;
 var ResearchQuestionsWindow, rqWindow, rqView, rqSubmitButton;
-var sliderValues = ['Strongly Disagree', 'Disagree', 'Neutral', 'Agree', 'Strongly Agree'];
+var sliderValues = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neither agree nor disagree', 'Somewhat agree', 'Agree', 'Strongly Agree'];
 var android_toolbar_setup = false;
 var answeredResearchQuestions = false;
 var currentClue;
@@ -65,8 +65,8 @@ function updateResearchQuestions()
 			tempTop = top+100;
 			slider = Titanium.UI.createSlider({
 				min:1,
-				max:5,
-				value:3,
+				max:7,
+				value:4,
 				width:'300dp',
 				height:'auto',
 				top:tempTop + 'dp',
