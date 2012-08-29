@@ -12,6 +12,8 @@ var sliderValues = ['Strongly disagree', 'Disagree', 'Somewhat disagree', 'Neith
 var android_toolbar_setup = false;
 var answeredResearchQuestions = false;
 var currentClue;
+var locationUpdates = 0;
+var debugLabel;
 
 Ti.include("/lib/version.js");
 
@@ -114,8 +116,12 @@ function fireUpTheCamera() {
 				Ti.API.info("Picture size: " + image.width + "x" + image.height);
 				var maxsize = Math.max(image.width, image.height);
 				var multiplier = (maxsize / 400) + 1;
-				var resizedImage = image.imageAsResized(image.width / multiplier, image.height / multipler);
-				db.finishHunt(clue.OnlineId, clue.huntid, resizedImage);
+				var resizedImage = image.imageAsResized(image.width / multiplier, image.height / multiplier);
+				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
+				Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
+				db.finishHunt(clue.huntid, clue.OnlineId, resizedImage);
+				clue = db.getCurrentClue();
+				clueLabel.text = "Please select a new hunt.";
 				Ti.App.fireEvent('forceHuntRefresh');
 				tabGroup.setActiveTab(0); // Go back to SelectHunt tab
 				/*
@@ -159,9 +165,18 @@ function fireUpTheCamera() {
 	});
 }
 
+function toRad(deg)
+{
+	return deg * Math.PI / 180;
+}
+
 function distance(lat1, lon1, lat2, lon2)
 {
 	var R = 6378100; // radius of earth in metters
+	lat1 = toRad(lat1);
+	lon1 = toRad(lon1);
+	lat2 = toRad(lat2);
+	lon2 = toRad(lon2);
 	var d = Math.acos(Math.sin(lat1)*Math.sin(lat2) + 
                   Math.cos(lat1)*Math.cos(lat2) *
                   Math.cos(lon2-lon1)) * R;
@@ -172,14 +187,6 @@ function switchToNewClue() {
 	updateResearchQuestions();
 	clueLabel.text = clue['description'];
 	currentClue = clue.id;
-	Ti.API.info("switchToNewClue(): debug? " + debug);
-	if (debug) {
-		var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
-		clueLabel.text = clueLabel.text + "\nlat: " + Math.floor(currentLocation.latitude * 1000) / 1000 
-							+ " lon: " + Math.floor(currentLocation.longitude * 1000) / 1000 
-							+ " acc: " + currentLocation.accuracy + "m d: " + Math.floor(d * 1000) / 1000 + "m";
-		//newHeight += 40;
-	}
 }
 
 function updateHotColdImage() {
@@ -219,6 +226,9 @@ function updateMapWindow() {
 	}
 	
 	founditButton.addEventListener('click', function() {
+		if (currentClue == -1) {
+			return;
+		}
 		var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
 		Ti.API.info("Found it clicked: Distance from clue ", d);
 		d = 10; // FIXME: Delete this
@@ -227,8 +237,8 @@ function updateMapWindow() {
 			currentClue = -1;
 			db.finishClue(clue.id);
 			db.uploadClueData(clue.id, true);
-			clue = db.getCurrentClue();
-			if (clue.length == 0) {
+			var newClue = db.getCurrentClue();
+			if (newClue.length == 0) {
 				// Final clue show camera
 				var alertDialog = Titanium.UI.createAlertDialog({
 					title: 'Found It',
@@ -241,6 +251,7 @@ function updateMapWindow() {
 				});
 				alertDialog.show();
 			} else {
+				clue = newClue;
 				// Another clue to move to
 				var alertDialog = Titanium.UI.createAlertDialog({
 					title: 'Found It',
@@ -268,7 +279,11 @@ function updateMapWindow() {
 	
 	updateHotColdImage();
 	
-	self.setToolbar([hotColdImage, flexSpace, founditButton]);
+	if (debug) {
+		self.setToolbar([hotColdImage, debugLabel, flexSpace, founditButton]);
+	} else {
+		self.setToolbar([hotColdImage, flexSpace, founditButton]);
+	}
 }
 
 function MapWindow(tab) {
@@ -340,6 +355,13 @@ function MapWindow(tab) {
 		}
 	}
 	
+	if (debug) {
+		debugLabel = Titanium.UI.createLabel({
+			width:'auto',
+			text:'9999m 9999'
+		});
+	}
+	
 	hotColdImage = Titanium.UI.createImageView({
 		image:'/images/cool.png'
 	});
@@ -370,6 +392,10 @@ function MapWindow(tab) {
         userLocation:true
     });
     
+    if (android) {
+    	mapview.mapType = Titanium.Map.SATELLITE_TYPE;
+    }
+    
     // Default currentLocation for android
     currentLocation = {latitude:0, longitude:0, accuracy:-1, timestamp:0};
     
@@ -391,6 +417,7 @@ function MapWindow(tab) {
 			var accuracy = e.coords.accuracy;
 			var timestamp = e.coords.timestamp;
 			Ti.API.info("Location Updated: latitude: " + latitude + " longitude: " + longitude + " accuracy: " + accuracy + " ts: " + timestamp);
+			locationUpdates = locationUpdates + 1;
 			if (firstlocation == false) {
 				mapview.region = {latitude:latitude, longitude:longitude,latitudeDelta:0.01, longitudeDelta:0.01};
 				firstlocation = true;
@@ -399,6 +426,11 @@ function MapWindow(tab) {
 			Ti.API.info("currentClue: " + currentClue);
 			if (currentClue != -1) {
 				db.saveLocation(currentClue, currentLocation);
+				if (debug) {
+					var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
+					debugLabel.text = "" + Math.floor(d) + "m " + locationUpdates;	
+					Ti.API.info("Updating debug: " + debugLabel.text);
+				}
 			}
 	};
 	

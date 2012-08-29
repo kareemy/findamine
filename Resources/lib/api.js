@@ -167,7 +167,7 @@ exports.uploadImage = function(huntid, finalClueOnlineId, imageData, retryOnFail
 	var authenticate = require('lib/authenticate');
 	var username = authenticate.getUserName();
 	var hashedPassword = authenticate.getHashedPassword();
-	var url = baseURL + "/UploadImage?clueID=" + finalClueID + "&fileExtension=png&username=" + username + "&password=" + hashedPassword;
+	var url = baseURL + "/UploadImage?clueID=" + finalClueOnlineId + "&fileExtension=png&username=" + username + "&password=" + hashedPassword;
 	Ti.API.info("api.getAvailableHunts: " + url);
 	xhr.open('POST', url);
 	xhr.setRequestHeader("Content-Type", "text/plain");

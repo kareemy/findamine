@@ -26,6 +26,7 @@ function RefreshHuntPicker(e)
 	
 	if (hunts.length == 0) {
 		actInd.hide();
+		bottomLabel.hide();
 		topLabel.text = "Sorry no hunts available. Please check back later.";
 		topLabel.show();
 		if (e.error != 0) {
@@ -58,6 +59,7 @@ function RefreshHuntPicker(e)
 	huntPicker.selectionIndicator = true;
 	huntPicker.setSelectedRow(0,activeRow,true);
 	bottomLabel.text = "Selected Hunt: " + hunts[activeRow]['description'] + "\nEnds: " + hunts[activeRow]['endtime'] + "\n\nSwitch to the Map tab to start this hunt.";
+	bottomLabel.show();
 	db.setActiveHunt(hunts[activeRow]['id']);
 	
 	actInd.hide();

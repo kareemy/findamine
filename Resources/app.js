@@ -59,12 +59,25 @@ if (Ti.version < 1.8 ) {
 	});
 	
 	var ApplicationTabGroup = require('ui/common/ApplicationTabGroup');
-	new ApplicationTabGroup().open();
+	var appWindow = new ApplicationTabGroup();
+	if (android) {
+		Ti.App.addEventListener("loggedIn", function() {
+			Ti.API.info("app.js main(): ANDROID loggedIn event triggered. Opening applicationTabGroup");
+			appWindow.open();
+		});
+	} else {
+		appWindow.open();
+	}
 	
-	if (!authenticate.isLoggedIn()) {
+	if (!authenticate.isLoggedIn()) {	
 		Ti.API.info("app.js main(): User is not logged in. Showing modal login window.");
 		var LoginWindow = require('ui/common/LoginWindow');
 		var w = new LoginWindow();
 		w.open();
+	} else {
+		if (android) {
+			appWindow.open();
+		}
 	}
+	
 })();

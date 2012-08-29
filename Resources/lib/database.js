@@ -110,7 +110,7 @@ function getHuntsFromDB()
 {
 	var db = Titanium.Database.open(dbName);
 	
-	var resultSet = db.execute("SELECT id, Description, ActivationTime, ExpirationTime from Hunt Where ActivationTime < datetime('now') and ExpirationTime > datetime('now')");
+	var resultSet = db.execute("SELECT id, Description, ActivationTime, ExpirationTime from Hunt Where ActivationTime < datetime('now') and ExpirationTime > datetime('now') and Solved = 0");
 	var results = [];
 	while (resultSet.isValidRow()) {
 		results.push({

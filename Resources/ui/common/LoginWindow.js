@@ -6,8 +6,12 @@ Ti.include("/lib/version.js");
 
 function LoginWindow() {
 	Ti.API.info("LoginWindow(): Creating Login Window.")
+	useModal = true;
+	if (android) { 
+		useModal = false;
+	}
 	var self = Ti.UI.createWindow({
-		modal: true,
+		modal: useModal,
 		title:"Find-a-mine Login",
 		backgroundColor:'White'
 	});
