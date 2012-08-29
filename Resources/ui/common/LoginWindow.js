@@ -71,8 +71,7 @@ function LoginWindow() {
 		});
 	} else {
 		actInd = Titanium.UI.createActivityIndicator({
-			top:'210dp', 
-			height:'50dp',
+			top:'0dp', 
 			height:'50dp',
 			width:'auto',
 			style: Titanium.UI.iPhone.ActivityIndicatorStyle.DARK,
