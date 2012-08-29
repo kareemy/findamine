@@ -2,7 +2,7 @@
  * @author Kareem Dana
  */
 
-var self, db, mapview, backgroundLabel, clueLabel, hotColdImage;
+var self, db, mapview, containerView, backgroundView, clueLabel, hotColdImage;
 var firstlocation;
 var clue = [];
 var currentLocation;
@@ -24,10 +24,7 @@ function updateResearchQuestions()
 	if (rqArray.length == 0) {
 		return;
 	}
-	// FIXME: Handle heights better
-	var tempTop = 130 * rqArray.length + 15;
-	rqSubmitButton.top = tempTop + 'dp';
-	rqView.height = tempTop + 100;
+
 	var labels = [];
 	var children = rqView.getChildren();
 	for (var i = 0; i < children.length; i++) {
@@ -36,42 +33,36 @@ function updateResearchQuestions()
 	}
 	
 	for (var i = 0; i < rqArray.length; i++) {
-		var top = 130*i;
 		if (i > 0) {
 			var hr = Titanium.UI.createView({
 				width: '100%',
 				height: 1,
 				borderWidth: 1,
-				borderColor: "black",
-				top:top
+				borderColor: "black"
 			});
 			rqView.add(hr);
-			top = top + 1;
 		}
 		var questionLabel = Titanium.UI.createLabel({
 			text: rqArray[i].questiontext,
-			height:75,
-			width:'auto',
-			font: {fontSize: 14},
-			top:top + 'dp'
+			height:Ti.UI.SIZE,
+			left:'10dp',
+			right:'10dp',
+			font: {fontSize: '14dp'},
+			touchEnabled:false,
+			top:'15dp'
 		});
 		rqView.add(questionLabel);
 		var slider;
 		// FIXME: Handle question types properly
 		//if (rqArray[i].questiontype == 1) {
-			tempTop = top+80;
-			labels[i] = Titanium.UI.createLabel({
-				text:'Neutral',
-				top:tempTop + 'dp'
-			});
-			tempTop = top+100;
 			slider = Titanium.UI.createSlider({
 				min:1,
 				max:7,
 				value:4,
-				width:'300dp',
+				width:'90%',
 				height:'auto',
-				top:tempTop + 'dp',
+				top:'4dp',
+				bottom:'15dp',
 				oldvalue:-1,
 				id:rqArray[i].id,
 				labelid:i
@@ -84,6 +75,11 @@ function updateResearchQuestions()
 					labels[e.source.labelid].text = sliderValues[Math.round(e.value)-1];
 				}
 			});
+			labels[i] = Titanium.UI.createLabel({
+				text:sliderValues[slider.value],
+				top:'10dp',
+				touchEnabled:false
+			});
 			rqView.add(labels[i]);
 			rqView.add(slider);
 		//}
@@ -92,9 +88,9 @@ function updateResearchQuestions()
 	Ti.App.addEventListener("researchQuestionsSubmitted", function(e) {
 		db.startClue(clue.id);
 		db.uploadClueData(clue.id, false);
-		Ti.API.info("height: ", clueLabel.size.height);
-		var newHeight = clueLabel.size.height;
-		backgroundLabel.height = newHeight + 'dp';
+		var newHeight = clueLabel.size.height + clueLabel.rect.y*2;
+		Ti.API.info("height: ", newHeight);
+		backgroundView.height = newHeight;
 	});
 	
 	rqWindow.open();
@@ -366,35 +362,44 @@ function MapWindow(tab) {
 		image:'/images/cool.png'
 	});
 	
-	backgroundLabel = Titanium.UI.createLabel({
+	containerView = Ti.UI.createView({
 		top:0,
-		height:'66dp',
-		width:'320dp',
+		height:Ti.UI.SIZE,
+		width:'100%'
+	});
+	
+	backgroundView = Titanium.UI.createView({
+		width:'100%',
 		opacity:0.5,
 		backgroundColor:'black',
-		text:'   '
+		top:0
 	});
 	clueLabel = Titanium.UI.createLabel({
-		top:0,
-		height:'auto',
-		width:'320dp',
+		top:'5dp',
+		left:'5dp',
+		right:'5dp',
+		height:Ti.UI.SIZE,
 		color:'white',
-		font:{fontSize: 16},
+		font:{fontSize: '14dp'},
 		text:'Please select a new hunt. No clues available.'
 	});
 	
+	containerView.addEventListener('postlayout', function(){
+		var newHeight = clueLabel.size.height + clueLabel.rect.y*2;
+		if(backgroundView.height != newHeight) {
+			Ti.API.info("height: ", newHeight);
+			backgroundView.height = newHeight;
+		}
+	});
+	
     mapview = Titanium.Map.createView({
-        mapType: Titanium.Map.HYBRID_TYPE,
+        mapType: (android) ? Ti.Map.SATELLITE_TYPE : Ti.Map.HYBRID_TYPE,
         region: {latitude:33.74511, longitude:-84.38993, 
                 latitudeDelta:0.01, longitudeDelta:0.01},
         animate:true,
         regionFit:true,
         userLocation:true
     });
-    
-    if (android) {
-    	mapview.mapType = Titanium.Map.SATELLITE_TYPE;
-    }
     
     // Default currentLocation for android
     currentLocation = {latitude:0, longitude:0, accuracy:-1, timestamp:0};
@@ -437,8 +442,9 @@ function MapWindow(tab) {
 	Titanium.Geolocation.addEventListener('location', locationCallback);
   
     self.add(mapview);
-	self.add(backgroundLabel);
-	self.add(clueLabel);
+	containerView.add(backgroundView);
+	containerView.add(clueLabel);
+	self.add(containerView);
 	self.addEventListener("open", function() {
 		Ti.API.info("MapWindow(): Opening Map Window.");
 		switchToNewClue();

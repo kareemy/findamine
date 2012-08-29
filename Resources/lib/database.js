@@ -239,21 +239,23 @@ exports.finishClue = function(clueid)
 
 exports.getResearchQuestions = function(clueid)
 {
-	Ti.API.info("getResearchQuestions(): Getting research questions.")
-	var db = Titanium.Database.open(dbName);
-	var resultSet = db.execute("SELECT id, QuestionType, QuestionText FROM ResearchQuestion WHERE ClueId = ? AND Answered = 0 ORDER BY QuestionOrder", clueid);
+	Ti.API.info("getResearchQuestions(): Getting research questions.");
 	var results = [];
-	while (resultSet.isValidRow()) {
-		results.push({
-			id: resultSet.fieldByName('id'),
-			questiontype: resultSet.fieldByName('questiontype'),
-			questiontext: resultSet.fieldByName('questiontext')
-		});
-		resultSet.next();	
+	if(clueid){
+		var db = Titanium.Database.open(dbName);
+		var resultSet = db.execute("SELECT id, QuestionType, QuestionText FROM ResearchQuestion WHERE ClueId = ? AND Answered = 0 ORDER BY QuestionOrder", clueid);
+		while (resultSet.isValidRow()) {
+			results.push({
+				id: resultSet.fieldByName('id'),
+				questiontype: resultSet.fieldByName('questiontype'),
+				questiontext: resultSet.fieldByName('questiontext')
+			});
+			resultSet.next();	
+		}
+	
+		resultSet.close();
+		db.close();
 	}
-
-	resultSet.close();
-	db.close();
 	return results;
 }
 

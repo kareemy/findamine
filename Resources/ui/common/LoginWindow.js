@@ -6,16 +6,26 @@ Ti.include("/lib/version.js");
 
 function LoginWindow() {
 	Ti.API.info("LoginWindow(): Creating Login Window.")
-	useModal = true;
-	if (android) { 
-		useModal = false;
-	}
 	var self = Ti.UI.createWindow({
-		modal: useModal,
+		modal: (android) ? false : true,
 		title:"Find-a-mine Login",
 		backgroundColor:'White',
-		layout:'vertical',
-		exitOnClose:true
+		layout:'vertical'
+	});
+	
+	self.addEventListener('android:back', function(){
+		var alert = Ti.UI.createAlertDialog({
+			title:'Login Required',
+			message:'You must login in order to use Find-a-mine.\n\nTo create an account, please visit http://www.findamine.mobi.',
+			buttonNames:['Create Account', 'Okay'],
+			cancel:1
+		});
+		alert.addEventListener('click',function(e){
+			if(e.index == 0){
+				Ti.Platform.openURL('http://www.findamine.mobi/members/register.aspx');
+			}
+		});
+		alert.show();
 	});
 	
 	var label_f = Titanium.UI.createLabel({

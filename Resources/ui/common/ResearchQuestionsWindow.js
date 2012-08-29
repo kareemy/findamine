@@ -9,23 +9,32 @@ function ResearchQuestionsWindow() {
 	var self = Ti.UI.createWindow({
 		title:"Research Questions",
 		backgroundColor:'white',
-		modal: true
+		modal: (android) ? false : true
+	});
+	
+	self.addEventListener('android:back', function(){
+		Ti.UI.createAlertDialog({
+			title:'Questions Incomplete',
+			message:'You must complete the questions before continuing.',
+			buttonNames:['Okay'],
+			cancel:0
+		}).show();
 	});
 	
 	var scrollView = Titanium.UI.createScrollView({
-		contentWidth:'auto',
-		contentHeight:'auto',
+		contentWidth:'100%',
+		contentHeight:Ti.UI.SIZE,
 		top:0,
 		showVerticalScrollIndicator:true,
-		showHorizontalScrollIndicator:true
+		showHorizontalScrollIndicator:true,
+		layout:'vertical'
 	});
 	
 	var view = Ti.UI.createView({
-		backgroundColor:'white',
 		borderRadius:0,
 		width:'auto',
-		height:'1000dp',
-		top:0
+		height:Ti.UI.SIZE,
+		layout:'vertical'
 	});
 	
 	scrollView.add(view);
@@ -34,10 +43,11 @@ function ResearchQuestionsWindow() {
 		height:'44dp',
 		width:'200dp',
 		title:'Submit',
-		top:'100dp'
+		top:'10dp',
+		bottom:'10dp'
 	});
 
-	view.add(button);
+	scrollView.add(button);
 	
 	button.addEventListener('click', function() {
 		Ti.App.fireEvent("researchQuestionsSubmitted");
