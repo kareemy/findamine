@@ -5,7 +5,7 @@ Ti.include("/lib/version.js");
 
 function ResearchQuestionsWindow() {
 	Ti.API.info("ResearchQuestionsWindow(): Creating New Research Questions window.");
-	// FIXME: Handle heights better
+	
 	var self = Ti.UI.createWindow({
 		title:"Research Questions",
 		backgroundColor:'white',

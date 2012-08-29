@@ -49,7 +49,8 @@ function updateResearchQuestions()
 			right:'10dp',
 			font: {fontSize: '14dp'},
 			touchEnabled:false,
-			top:'15dp'
+			top:'15dp',
+			color:'black'
 		});
 		rqView.add(questionLabel);
 		var slider;
@@ -78,7 +79,8 @@ function updateResearchQuestions()
 			labels[i] = Titanium.UI.createLabel({
 				text:sliderValues[slider.value],
 				top:'10dp',
-				touchEnabled:false
+				touchEnabled:false,
+				color:'black'
 			});
 			rqView.add(labels[i]);
 			rqView.add(slider);
@@ -112,6 +114,8 @@ function fireUpTheCamera() {
 				Ti.API.info("Picture size: " + image.width + "x" + image.height);
 				var maxsize = Math.max(image.width, image.height);
 				var multiplier = (maxsize / 400) + 1;
+				//var resizedImage = Ti.UI.createImageView({image:image,height:480,width:640}).toImage();
+				//imageAsResized is an iOS function, this 'work around' should work
 				var resizedImage = image.imageAsResized(image.width / multiplier, image.height / multiplier);
 				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
 				Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
@@ -411,32 +415,32 @@ function MapWindow(tab) {
 	
 	var locationCallback = function(e)
 	{
-			if (!e.success || e.error)
-			{
-				Ti.API.info("Code translation: "+translateErrorCode(e.code));
-				return;
+		if (!e.success || e.error)
+		{
+			Ti.API.info("Code translation: "+translateErrorCode(e.code));
+			return;
+		}
+		
+		var longitude = e.coords.longitude;
+		var latitude = e.coords.latitude;
+		var accuracy = e.coords.accuracy;
+		var timestamp = e.coords.timestamp;
+		Ti.API.info("Location Updated: latitude: " + latitude + " longitude: " + longitude + " accuracy: " + accuracy + " ts: " + timestamp);
+		locationUpdates = locationUpdates + 1;
+		if (firstlocation == false) {
+			mapview.region = {latitude:latitude, longitude:longitude,latitudeDelta:0.01, longitudeDelta:0.01};
+			firstlocation = true;
+		}
+		currentLocation = {latitude:latitude, longitude:longitude, accuracy:accuracy, timestamp:timestamp};
+		Ti.API.info("currentClue: " + currentClue);
+		if (currentClue != -1) {
+			db.saveLocation(currentClue, currentLocation);
+			if (debug) {
+				var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
+				debugLabel.text = "" + Math.floor(d) + "m " + locationUpdates;
+				Ti.API.info("Updating debug: " + debugLabel.text);
 			}
-			
-			var longitude = e.coords.longitude;
-			var latitude = e.coords.latitude;
-			var accuracy = e.coords.accuracy;
-			var timestamp = e.coords.timestamp;
-			Ti.API.info("Location Updated: latitude: " + latitude + " longitude: " + longitude + " accuracy: " + accuracy + " ts: " + timestamp);
-			locationUpdates = locationUpdates + 1;
-			if (firstlocation == false) {
-				mapview.region = {latitude:latitude, longitude:longitude,latitudeDelta:0.01, longitudeDelta:0.01};
-				firstlocation = true;
-			}
-			currentLocation = {latitude:latitude, longitude:longitude, accuracy:accuracy, timestamp:timestamp};
-			Ti.API.info("currentClue: " + currentClue);
-			if (currentClue != -1) {
-				db.saveLocation(currentClue, currentLocation);
-				if (debug) {
-					var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
-					debugLabel.text = "" + Math.floor(d) + "m " + locationUpdates;	
-					Ti.API.info("Updating debug: " + debugLabel.text);
-				}
-			}
+		}
 	};
 	
 	Titanium.Geolocation.addEventListener('location', locationCallback);

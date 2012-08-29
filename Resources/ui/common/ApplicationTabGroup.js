@@ -14,21 +14,21 @@ function ApplicationTabGroup() {
 	
 	var tab1 = Ti.UI.createTab({
 		title: L('hunts'),
-		icon: '/images/tabhunt.png',
+		icon: '/images/tabBarIcons/hunts.png',
 		window: win1
 	});
 	win1.containingTab = tab1;
 	
 	var tab2 = Ti.UI.createTab({
 		title: L('map'),
-		icon: '/images/tabmap.png',
+		icon: '/images/tabBarIcons/map.png',
 		window: win2
 	});
 	win2.containingTab = tab2;
 	
 	var tab3 = Ti.UI.createTab({
 		title: L('settings'),
-		icon: '/images/KS_nav_views.png',
+		icon: '/images/tabBarIcons/settings.png',
 		window: win3
 	});
 	win3.containingTab = tab3;
