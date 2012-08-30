@@ -111,26 +111,17 @@ function fireUpTheCamera() {
 				// FIXME: Verify that camera operation works and it saves image properly
 				Ti.API.info("Got picture. Finishing hunt and saving image");
 				Ti.API.info("Picture size: " + image.width + "x" + image.height);
-
-				var resizedImageX = Ti.UI.createImageView({image:image,height:640,width:480,canScale:true}).toImage();
-				//imageAsResized is an iOS function, this 'work around' should work
 				var resizedImage;
 				if (android) {
-					var maxsize = Math.max(event.cropRect.width, event.cropRect.height);
-					var multiplier = (maxsize / 400) + 1;
-					var imageMod = require('org.selfkleptomaniac.ti.imageasresized');
-					alert("width: " + event.cropRect.width + " height: " + event.cropRect.height);
-					var w = event.cropRect.width / multiplier;
-					var h = event.cropRect.height / multiplier;
-					resizedImage = imageMod.cameraImageAsResized(image, w, h, 0);
+					resizedImage = Ti.UI.createImageView({image:image,height:640,width:480,canScale:true}).toImage();
 				} else {
 					var maxsize = Math.max(image.width, image.height);
 					var multiplier = (maxsize / 400) + 1;
 					resizedImage = image.imageAsResized(image.width / multiplier, image.height / multiplier);
 				}
 				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
-				Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
-				db.finishHunt(clue.huntid, clue.OnlineId, resizedImageX.media.image);
+				//Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
+				db.finishHunt(clue.huntid, clue.OnlineId, resizedImage);
 				clue = db.getCurrentClue();
 				clueLabel.text = "Please select a new hunt.";
 				tabGroup.setActiveTab(0);

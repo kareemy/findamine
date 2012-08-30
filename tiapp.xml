@@ -45,7 +45,5 @@
         </splash>
         <theme>default</theme>
     </mobileweb>
-    <modules>
-        <module platform="android" version="0.4">org.selfkleptomaniac.ti.imageasresized</module>
-    </modules>
+    <modules/>
 </ti:app>
