@@ -103,7 +103,6 @@ function fireUpTheCamera() {
 	
 		success:function(event)
 		{
-			var cropRect = event.cropRect;
 			var image = event.media;
 	
 			Ti.API.info('fireUpTheCamera(): Successfully took picture. Our type was: '+event.mediaType);
@@ -112,14 +111,26 @@ function fireUpTheCamera() {
 				// FIXME: Verify that camera operation works and it saves image properly
 				Ti.API.info("Got picture. Finishing hunt and saving image");
 				Ti.API.info("Picture size: " + image.width + "x" + image.height);
-				var maxsize = Math.max(image.width, image.height);
-				var multiplier = (maxsize / 400) + 1;
-				var resizedImage = Ti.UI.createImageView({image:image,height:640,width:480,canScale:true}).toImage();
+
+				var resizedImageX = Ti.UI.createImageView({image:image,height:640,width:480,canScale:true}).toImage();
 				//imageAsResized is an iOS function, this 'work around' should work
-				//var resizedImage = image.imageAsResized(image.width / multiplier, image.height / multiplier);
+				var resizedImage;
+				if (android) {
+					var maxsize = Math.max(event.cropRect.width, event.cropRect.height);
+					var multiplier = (maxsize / 400) + 1;
+					var imageMod = require('org.selfkleptomaniac.ti.imageasresized');
+					alert("width: " + event.cropRect.width + " height: " + event.cropRect.height);
+					var w = event.cropRect.width / multiplier;
+					var h = event.cropRect.height / multiplier;
+					resizedImage = imageMod.cameraImageAsResized(image, w, h, 0);
+				} else {
+					var maxsize = Math.max(image.width, image.height);
+					var multiplier = (maxsize / 400) + 1;
+					resizedImage = image.imageAsResized(image.width / multiplier, image.height / multiplier);
+				}
 				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
 				Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
-				db.finishHunt(clue.huntid, clue.OnlineId, resizedImage);
+				db.finishHunt(clue.huntid, clue.OnlineId, resizedImageX.media.image);
 				clue = db.getCurrentClue();
 				clueLabel.text = "Please select a new hunt.";
 				tabGroup.setActiveTab(0);
@@ -127,11 +138,11 @@ function fireUpTheCamera() {
 				// Go back to SelectHunt tab
 				/*
 				var imageView = Ti.UI.createImageView({
-					width:win.width,
-					height:win.height,
+					width:self.width,
+					height:self.height,
 					image:event.media
 				});
-				win.add(imageView);
+				self.add(imageView);
 				*/
 			}
 			else
@@ -278,7 +289,6 @@ function updateMapWindow() {
 	
 	var flexSpace = (android) ? Ti.UI.createView({width:'100dp'}) : Ti.UI.createButton({systemButton:Titanium.UI.iPhone.SystemButton.FLEXIBLE_SPACE});
 	
-	updateHotColdImage();
 	
 	if (debug) {
 		self.setToolbar([hotColdImage, debugLabel, flexSpace, founditButton]);
@@ -409,7 +419,7 @@ function MapWindow(tab) {
     // Default currentLocation for android
     currentLocation = {latitude:0, longitude:0, accuracy:-1, timestamp:0};
     
-	Ti.Geolocation.preferredProvider = "gps";
+	//Ti.Geolocation.preferredProvider = "gps";
 	Ti.Geolocation.purpose = "Location needed to play the scavenger hunt game.";
 	Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_NEAREST_TEN_METERS;
 	Titanium.Geolocation.distanceFilter = 1;
@@ -436,6 +446,7 @@ function MapWindow(tab) {
 		Ti.API.info("currentClue: " + currentClue);
 		if (currentClue != -1) {
 			db.saveLocation(currentClue, currentLocation);
+			updateHotColdImage();
 			if (debug) {
 				var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
 				debugLabel.text = "" + Math.floor(d) + "m " + locationUpdates;

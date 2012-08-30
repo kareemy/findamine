@@ -12,7 +12,7 @@ function SettingsWindow(title) {
 		top: 0,
 		width:'320dp',
 		height:'auto',
-		text: 'There are no settings to change yet.\n\n\n This application is developed at West Texas A&M University (www.wtamu.edu).\n Certain icons created by Glyphish (glyphish.com).'
+		text: 'There are no settings to change yet.'
 	});
 	self.add(label);
 	return self;
