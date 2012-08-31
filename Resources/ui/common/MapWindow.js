@@ -84,6 +84,7 @@ function updateResearchQuestions()
 			});
 			rqView.add(labels[i]);
 			rqView.add(slider);
+			slider.value = 4;
 		//}
 	}
 
@@ -414,6 +415,32 @@ function MapWindow(tab) {
 	Ti.Geolocation.purpose = "Location needed to play the scavenger hunt game.";
 	Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_NEAREST_TEN_METERS;
 	Titanium.Geolocation.distanceFilter = 1;
+	if (android) {
+		Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_HIGH;
+		/*
+		Titanium.Geolocation.Android.manualMode = true;
+		var gpsProvider = Ti.Geolocation.Android.createLocationProvider({
+    		name: Ti.Geolocation.PROVIDER_GPS,
+    		minUpdateTime: 1, 
+    		minUpdateDistance: 1
+		});
+		Ti.Geolocation.Android.addLocationProvider(gpsProvider);
+		
+		var networkProvider = Ti.Geolocation.Android.createLocationProvider({
+    		name: Titanium.Geolocation.PROVIDER_NETWORK,
+    		minUpdateTime: 1, 
+    		minUpdateDistance: 1
+  		});
+		Ti.Geolocation.Android.addLocationProvider(networkProvider);
+
+		var passiveProvider = Ti.Geolocation.Android.createLocationProvider({
+    		name: Ti.Geolocation.PROVIDER_PASSIVE,
+    		minUpdateTime: 1, 
+    		minUpdateDistance: 1
+		});
+		Ti.Geolocation.Android.addLocationProvider(passiveProvider);
+		*/
+	}
 	
 	var locationCallback = function(e)
 	{

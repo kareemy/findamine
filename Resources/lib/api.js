@@ -171,6 +171,8 @@ exports.uploadImage = function(huntid, finalClueOnlineId, imageData, retryOnFail
 	Ti.API.info("api.getAvailableHunts: " + url);
 	xhr.open('POST', url);
 	xhr.setRequestHeader("Content-Type", "text/plain");
+	//xhr.setRequestHeader("enctype", "multipart/form-data");
+    //xhr.setRequestHeader("Content-Type", "image/png");
 	//xhr.setRequestHeader("Content-Length", imageData.size);
 	xhr.send(imageData);
 }
