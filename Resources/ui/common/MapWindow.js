@@ -190,6 +190,15 @@ function switchToNewClue() {
 	updateResearchQuestions();
 	clueLabel.text = clue['description'];
 	currentClue = clue.id;
+	if (currentClue != -1 && firstlocation) {
+		db.saveLocation(currentClue, currentLocation);
+		updateHotColdImage();
+		if (debug) {
+			var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
+			debugLabel.text = "" + Math.floor(d) + "m " + locationUpdates;
+			Ti.API.info("Updating debug: " + debugLabel.text);
+		}
+	}
 }
 
 function updateHotColdImage() {
@@ -280,9 +289,9 @@ function updateMapWindow() {
 	
 	var flexSpace = (android) ? Ti.UI.createView({width:'100dp'}) : Ti.UI.createButton({systemButton:Titanium.UI.iPhone.SystemButton.FLEXIBLE_SPACE});
 	
-	
 	if (debug) {
-		self.setToolbar([hotColdImage, debugLabel, flexSpace, founditButton]);
+		if(android) flexSpace = Ti.UI.createView({width:'50dp'});
+		self.setToolbar([hotColdImage, flexSpace, debugLabel, flexSpace, founditButton]);
 	} else {
 		self.setToolbar([hotColdImage, flexSpace, founditButton]);
 	}
@@ -345,6 +354,7 @@ function MapWindow(tab) {
 			});
 			var subView = Ti.UI.createView({
 				layout: 'horizontal',
+				height:'40dp',
 				width: Ti.UI.SIZE
 			});
 			toolbarView.add(subView);
@@ -367,6 +377,10 @@ function MapWindow(tab) {
 	hotColdImage = Titanium.UI.createImageView({
 		image:'/images/cool.png'
 	});
+	if(android) {
+		hotColdImage.height = '100%';
+		hotColdImage.width = Ti.UI.SIZE;
+	}
 	
 	containerView = Ti.UI.createView({
 		top:0,
@@ -391,7 +405,7 @@ function MapWindow(tab) {
 	});
 	
 	containerView.addEventListener('postlayout', function(){
-		var newHeight = clueLabel.size.height + clueLabel.rect.y*2;
+		var newHeight = (clueLabel) ? clueLabel.size.height + clueLabel.rect.y*2 : 0;
 		if(backgroundView.height != newHeight) {
 			Ti.API.info("height: ", newHeight);
 			backgroundView.height = newHeight;
@@ -416,7 +430,7 @@ function MapWindow(tab) {
 	Titanium.Geolocation.distanceFilter = 1;
 	if (android) {
 		Titanium.Geolocation.accuracy = Titanium.Geolocation.ACCURACY_HIGH;
-		/*
+		
 		Titanium.Geolocation.Android.manualMode = true;
 		var gpsProvider = Ti.Geolocation.Android.createLocationProvider({
     		name: Ti.Geolocation.PROVIDER_GPS,
@@ -438,7 +452,6 @@ function MapWindow(tab) {
     		minUpdateDistance: 1
 		});
 		Ti.Geolocation.Android.addLocationProvider(passiveProvider);
-		*/
 	}
 	
 	var locationCallback = function(e)
@@ -473,7 +486,7 @@ function MapWindow(tab) {
 	};
 	
 	Titanium.Geolocation.addEventListener('location', locationCallback);
-  
+  	
     self.add(mapview);
 	containerView.add(backgroundView);
 	containerView.add(clueLabel);
