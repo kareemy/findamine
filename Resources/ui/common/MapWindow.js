@@ -84,7 +84,6 @@ function updateResearchQuestions()
 			});
 			rqView.add(labels[i]);
 			rqView.add(slider);
-			slider.value = 4;
 		//}
 	}
 
