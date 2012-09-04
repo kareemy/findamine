@@ -219,6 +219,20 @@ exports.getCurrentClue = function()
 	return clue;
 };
 
+exports.isLastClue = function(clueid, huntid)
+{
+	var db = Titanium.Database.open(dbName);
+	var lastClue = false;
+	
+	var resultSet = db.execute("SELECT id FROM Clue WHERE HuntId = ? and Solved = 0 and id != ? ORDER BY ClueOrder", huntid, clueid);
+	if (resultSet.rowCount == 0) {
+		lastClue = true;
+	}
+	
+	resultSet.close();
+	db.close();
+	return lastClue;
+}
 exports.startClue = function(clueid)
 {
 	Ti.API.info("startClue(): Starting clue " + clueid);

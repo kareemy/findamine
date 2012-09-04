@@ -121,6 +121,9 @@ function fireUpTheCamera() {
 				}
 				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
 				//Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
+				currentClue = -1;
+				db.finishClue(clue.id);
+				db.uploadClueData(clue.id, true);
 				db.finishHunt(clue.huntid, clue.OnlineId, resizedImage);
 				clue = db.getCurrentClue();
 				clueLabel.text = "Please select a new hunt.";
@@ -219,8 +222,10 @@ function updateHotColdImage() {
 function updateMapWindow() {
 	Ti.API.info("updateMapWindow(): Updating Map Window.")
 	var newClue = db.getCurrentClue();
-	// FIXME: No clue, but hunt not solved yet = show camera?
+	var auth = require('/lib/authenticate');
+	
 	if (newClue.length == 0) return;
+	
 	if (clue.length != 0 && clue.id == newClue.id) {
 		Ti.API.info("updateMapWindow(): Still on same clue. No update needed.");
 		return;
@@ -246,11 +251,8 @@ function updateMapWindow() {
 		d = 10; // FIXME: Delete this
 		if (d < 100) {
 			// Found it
-			currentClue = -1;
-			db.finishClue(clue.id);
-			db.uploadClueData(clue.id, true);
-			var newClue = db.getCurrentClue();
-			if (newClue.length == 0) {
+			var newClue; 
+			if (db.isLastClue(clue.id, clue.huntid)) {
 				// Final clue show camera
 				var alertDialog = Titanium.UI.createAlertDialog({
 					title: 'Found It',
@@ -263,6 +265,10 @@ function updateMapWindow() {
 				});
 				alertDialog.show();
 			} else {
+				currentClue = -1;
+				db.finishClue(clue.id);
+				db.uploadClueData(clue.id, true);
+				newClue = db.getCurrentClue();
 				clue = newClue;
 				// Another clue to move to
 				var alertDialog = Titanium.UI.createAlertDialog({
