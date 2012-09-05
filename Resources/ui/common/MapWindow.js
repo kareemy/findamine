@@ -104,7 +104,7 @@ function fireUpTheCamera() {
 		success:function(event)
 		{
 			var image = event.media;
-	
+			var cropRect = event.cropRect;
 			Ti.API.info('fireUpTheCamera(): Successfully took picture. Our type was: '+event.mediaType);
 			if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
 			{
@@ -112,8 +112,11 @@ function fireUpTheCamera() {
 				Ti.API.info("Got picture. Finishing hunt and saving image");
 				Ti.API.info("Picture size: " + image.width + "x" + image.height);
 				var resizedImage;
+				
 				if (android) {
-					resizedImage = Ti.UI.createImageView({image:image,height:640,width:480,canScale:true}).toImage();
+					var maxsize = Math.max(cropRect.width, cropRect.height);
+					var multiplier = (maxsize / 400) + 1;
+					resizedImage = Ti.UI.createImageView({image:image,height:cropRect.height / multiplier,width:cropRect.width / multiplier,canScale:true}).toImage();
 				} else {
 					var maxsize = Math.max(image.width, image.height);
 					var multiplier = (maxsize / 400) + 1;
