@@ -248,7 +248,6 @@ function updateMapWindow() {
 		}
 		var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
 		Ti.API.info("Found it clicked: Distance from clue ", d);
-		d = 10; // FIXME: Delete this
 		if (d < 100) {
 			// Found it
 			var newClue; 
@@ -444,14 +443,14 @@ function MapWindow(tab) {
     		minUpdateDistance: 1
 		});
 		Ti.Geolocation.Android.addLocationProvider(gpsProvider);
-		
+		/*
 		var networkProvider = Ti.Geolocation.Android.createLocationProvider({
     		name: Titanium.Geolocation.PROVIDER_NETWORK,
     		minUpdateTime: 1, 
     		minUpdateDistance: 1
   		});
 		Ti.Geolocation.Android.addLocationProvider(networkProvider);
-
+		*/
 		var passiveProvider = Ti.Geolocation.Android.createLocationProvider({
     		name: Ti.Geolocation.PROVIDER_PASSIVE,
     		minUpdateTime: 1, 

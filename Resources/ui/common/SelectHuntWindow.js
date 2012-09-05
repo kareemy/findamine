@@ -23,7 +23,6 @@ function RefreshHuntPicker(e)
 	Ti.API.info(hunts);
 	
 	var activeHunt = db.getActiveHunt();
-	
 	if (hunts.length == 0) {
 		actInd.hide();
 		bottomLabel.hide();
@@ -35,12 +34,14 @@ function RefreshHuntPicker(e)
 		return;
 	} 
 	
-	if (huntPicker.columns[0]) {
-		var _col = huntPicker.columns[0];
-		var len = _col.rowCount;
-		for (var x = len-1; x >= 0; x--) {
-			var _row = _col.rows[x];
-			_col.removeRow(_row);
+	if (!android) {
+		if (huntPicker.columns[0]) {
+			var _col = huntPicker.columns[0];
+			var len = _col.rowCount;
+			for (var x = len-1; x >= 0; x--) {
+				var _row = _col.rows[x];
+				_col.removeRow(_row);
+			}
 		}
 	}
 	

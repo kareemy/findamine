@@ -11,4 +11,4 @@ var android = Ti.Platform.osname === 'android';
 var iPhone = Ti.Platform.osname === 'iphone';
 var iPad = Ti.Platform.osname === 'ipad';
 // FIXME: Remove this for production
-var debug = true;
+var debug = false;
