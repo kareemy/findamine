@@ -237,6 +237,7 @@ function updateMapWindow() {
 	
 	Ti.API.info("updateMapWindow(): New current clue: ");
 	Ti.API.info(clue);
+	switchToNewClue();
 	
 	var founditButton = Titanium.UI.createButton({
 			title:'Found It!'
