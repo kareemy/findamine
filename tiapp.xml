@@ -8,13 +8,13 @@
         <target device="blackberry">false</target>
     </deployment-targets>
     <sdk-version>2.1.1.GA</sdk-version>
-    <id>edu.wtamu.cis.findamine</id>
+    <id>mobi.findamine.findamine</id>
     <name>Find-a-mine</name>
     <version>1.5</version>
-    <publisher>kareemd</publisher>
+    <publisher>findamine.mobi</publisher>
     <url>http://www.findamine.mobi</url>
-    <description>not specified</description>
-    <copyright>2012 by kareemd</copyright>
+    <description>Find-a-mine is being developed as a non-profit, academic research initiative designed to study the social interactions among users of geospatially-aware mobile devices and applications given the emerging privacy risks and concerns associated with location-data.</description>
+    <copyright>2012 findamine.mobi</copyright>
     <icon>appicon.png</icon>
     <persistent-wifi>false</persistent-wifi>
     <prerendered-icon>false</prerendered-icon>
