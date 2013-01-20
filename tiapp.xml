@@ -13,7 +13,7 @@
     <version>1.6</version>
     <publisher>findamine.mobi</publisher>
     <url>http://www.findamine.mobi</url>
-    <description>Find-a-mine is being developed as a non-profit, academic research initiative designed to study the social interactions among users of geospatially-aware mobile devices and applications given the emerging privacy risks and concerns associated with location-data.</description>
+    <description>Find.a.mine is a social geo-caching game for small (e.g. 12) to large (e.g. 1200) sized groups. It's a great way to help people get to know their city, school, or workplace. To play in an existing game, simply register a free account at www.findamine.mobi, select the game you are joining, and then download this app. Once you've installed the app, enter the username and password you created on the website. If you would like it start a game of findamine in your area, contact us thorough the link provided on www.findamine.mobi. If you would like your business or organization to be one of the locations targeted by findamine games, please contact us through the website form.</description>
     <copyright>2012-2013 findamine.mobi</copyright>
     <icon>appicon.png</icon>
     <persistent-wifi>false</persistent-wifi>
