@@ -3,18 +3,14 @@ build/
 
 *.log
 
+.DS_Store
+
 Resources/android/images/.DS_Store
 
 Resources/android/images/res-hdpi/.DS_Store
 
-Resources/android/images/res-hdpi/.DS_Store
-
-Resources/android/images/res-ldpi/.DS_Store
-
 Resources/android/images/res-ldpi/.DS_Store
 
 Resources/android/images/res-mdpi/.DS_Store
 
-Resources/android/images/res-mdpi/.DS_Store
-
-.DS_Store
+.settings/com.appcelerator.titanium.core.prefs
