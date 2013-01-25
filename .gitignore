@@ -3,7 +3,11 @@ build/
 
 *.log
 
+*/.DS_Store
+
 .DS_Store
+
+Resources/iphone/images/.DS_Store
 
 Resources/android/images/.DS_Store
 
