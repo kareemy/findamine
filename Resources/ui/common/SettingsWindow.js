@@ -9,10 +9,13 @@ function SettingsWindow(title) {
 	});
 	
 	var label = Ti.UI.createLabel({
-		top: 0,
-		width:'320dp',
-		height:'auto',
-		text: 'There are no settings to change yet.'
+		top: '10dp',
+		left: '10dp',
+		right:'10dp',
+		text: 'There are no settings to change yet.',
+		font:{fontSize:'17dp'},
+		textAlign:Ti.UI.TEXT_ALIGNMENT_CENTER,
+		color:'black'
 	});
 	self.add(label);
 	return self;

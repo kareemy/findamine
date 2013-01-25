@@ -1,6 +1,6 @@
 function ApplicationTabGroup() {
 	//create module instance
-	var self = Ti.UI.createTabGroup();
+	var self = Ti.UI.createTabGroup({navBarHidden:true});
 	
 	// Windows
 	var MapWindow = require('ui/common/MapWindow');

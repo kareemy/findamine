@@ -47,7 +47,7 @@ function updateResearchQuestions()
 			height:Ti.UI.SIZE,
 			left:'10dp',
 			right:'10dp',
-			font: {fontSize: '14dp'},
+			font: {fontSize: '17dp'},
 			touchEnabled:false,
 			top:'15dp',
 			color:'black'
@@ -80,7 +80,8 @@ function updateResearchQuestions()
 				text:sliderValues[slider.value],
 				top:'10dp',
 				touchEnabled:false,
-				color:'black'
+				color:'#777777',
+				font:{fontSize:'14dp'}
 			});
 			rqView.add(labels[i]);
 			rqView.add(slider);
@@ -181,7 +182,7 @@ function toRad(deg)
 
 function distance(lat1, lon1, lat2, lon2)
 {
-	var R = 6378100; // radius of earth in metters
+	var R = 6378100; // radius of earth in meters
 	lat1 = toRad(lat1);
 	lon1 = toRad(lon1);
 	lat2 = toRad(lat2);
@@ -240,7 +241,8 @@ function updateMapWindow() {
 	switchToNewClue();
 	
 	var founditButton = Titanium.UI.createButton({
-			title:'Found It!'
+			title:(android) ? '   Found It!   ' : 'Found It!',
+			right:'15dp'
 	});
 	if (!android) {
 		founditButton.style = Titanium.UI.iPhone.SystemButtonStyle.BORDERED;
@@ -378,13 +380,18 @@ function MapWindow(tab) {
 	
 	if (debug) {
 		debugLabel = Titanium.UI.createLabel({
-			width:'auto',
-			text:'9999m 9999'
+			width:(android) ? Ti.UI.SIZE : Ti.Platform.displayCaps.platformWidth,
+			text:'9999m 9999',
+			font:{fontSize:'12dp'},
+			textAlign: Ti.UI.TEXT_ALIGNMENT_CENTER
 		});
 	}
 	
 	hotColdImage = Titanium.UI.createImageView({
-		image:'/images/cool.png'
+		image:'/images/cool.png',
+		height:'35dp',
+		width:Ti.UI.SIZE,
+		left:'5dp'
 	});
 	if(android) {
 		hotColdImage.height = '100%';

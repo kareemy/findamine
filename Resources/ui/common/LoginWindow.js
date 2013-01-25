@@ -8,7 +8,7 @@ function LoginWindow() {
 	Ti.API.info("LoginWindow(): Creating Login Window.")
 	var self = Ti.UI.createWindow({
 		modal: (android) ? false : true,
-		title:"Find-a-mine Login",
+		title:"find.a.mine Login",
 		backgroundColor:'White',
 		layout:'vertical'
 	});
@@ -16,7 +16,7 @@ function LoginWindow() {
 	self.addEventListener('android:back', function(){
 		var alert = Ti.UI.createAlertDialog({
 			title:'Login Required',
-			message:'You must login in order to use Find-a-mine.\n\nTo create an account, please visit http://www.findamine.mobi.',
+			message:'You must login in order to use find.a.mine.\n\nTo create an account, please visit http://www.findamine.mobi.',
 			buttonNames:['Create Account', 'Okay'],
 			cancel:1
 		});
@@ -30,36 +30,46 @@ function LoginWindow() {
 	
 	var label_f = Titanium.UI.createLabel({
 		color: '#000',
-		text: 'Welcome to Find-a-mine! Please visit http://www.findamine.mobi to sign up and enter your username and password below to get started.',
+		text: 'Welcome to find.a.mine! Please visit http://www.findamine.mobi to sign up and enter your username and password below to get started.',
 		top:'10dp',
 		left:'10dp',
-		right:'10dp'
+		right:'10dp',
+		font:{fontSize:'17dp'},
+		autoLink:Ti.UI.AUTOLINK_URLS
 	});
 	
 	var username_tf = Titanium.UI.createTextField({
 		color:'#336699',
 		height:(android) ? '45dp' : 35,
 		top:'15dp',
-		//left:'10dp',
-		width:'250dp',
+		left:'10%',
+		right:'10%',
+		//width:'250dp',
 		keyboardType:Titanium.UI.KEYBOARD_DEFAULT,
-		returnKeyType:Titanium.UI.RETURNKEY_DEFAULT,
+		returnKeyType:Titanium.UI.RETURNKEY_NEXT,
 		borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
 		autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
+		clearButtonMode:Ti.UI.INPUT_BUTTONMODE_ONFOCUS,
 		autocorrect: false,
 		hintText: "Username"
+	});
+	
+	username_tf.addEventListener('return',function(){
+		password_tf.focus();
 	});
 	
 	var password_tf = Titanium.UI.createTextField({
 		color:'#336699',
 		height:(android) ? '45dp' : 35,
 		top:'15dp',
-		//left:'10dp',
-		width:'250dp',
+		left:'10%',
+		right:'10%',
+		//width:'250dp',
 		keyboardType:Titanium.UI.KEYBOARD_DEFAULT,
-		returnKeyType:Titanium.UI.RETURNKEY_DEFAULT,
+		returnKeyType:Titanium.UI.RETURNKEY_DONE,
 		borderStyle:Titanium.UI.INPUT_BORDERSTYLE_ROUNDED,
 		autocapitalization: Titanium.UI.TEXT_AUTOCAPITALIZATION_NONE,
+		clearButtonMode:Ti.UI.INPUT_BUTTONMODE_ONFOCUS,
 		autocorrect: false,
 		hintText: "Password",
 		passwordMask: true
@@ -72,24 +82,28 @@ function LoginWindow() {
 		top:'15dp'
 	});
 	
+	password_tf.addEventListener('return',function(){
+		button.fireEvent('click');
+	});
+	
 	var actInd;
-	if (android) {
+	/*if (android) {
 		actInd = Titanium.UI.createActivityIndicator({
-			bottom:10, 
-			height:50,
-			width:150
+			top:'-46dp', 
+			height:'44dp',
+			width:'auto'
 		});
-	} else {
+	} else {*/
 		actInd = Titanium.UI.createActivityIndicator({
-			top:'0dp', 
-			height:'50dp',
-			width:'auto',
-			style: Titanium.UI.iPhone.ActivityIndicatorStyle.DARK,
-			font: {fontFamily:'Helvetica Neue', fontSize:15,fontWeight:'bold'},
-			color: 'black',
-			message: 'Logging in...'
+			top:'-44dp', 
+			height:'44dp',
+			width:Ti.UI.SIZE,
+			style: (android) ? Titanium.UI.ActivityIndicatorStyle.DARK : Titanium.UI.iPhone.ActivityIndicatorStyle.DARK,
+			font: {fontFamily:'Helvetica Neue', fontSize:'15dp',fontWeight:'bold'},
+			color: '#444444',
+			message: ' Logging in...'
 		});
-	}
+	//}
 	
 	self.add(label_f);
 	self.add(username_tf);
@@ -124,7 +138,7 @@ function LoginWindow() {
 		var authenticate = require('/lib/authenticate');
 		button.hide();
 		actInd.show();
-		if (android) actInd.message = "Logging in...";
+		//if (android) actInd.message = " Logging in...";
 		authenticate.login(username_tf.value, password_tf.value);
 		/*
 		if (authenticate.login(username_tf.value, password_tf.value)) {

@@ -36,15 +36,6 @@ if (Ti.version < 1.8 ) {
 	var db = require('lib/database');
 	db.setupDatabase();
 	
-	/*
-	var Window;
-	if (tablet) {
-		Window = require('ui/tablet/ApplicationWindow');
-	}
-	else {
-		Window = require('ui/handheld/ApplicationWindow');
-	}
-	*/
 	var authenticate = require('lib/authenticate');
 	
 	Ti.App.addEventListener("pause", function() {

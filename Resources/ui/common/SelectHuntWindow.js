@@ -83,37 +83,37 @@ function SetupSelectHuntWindow()
 		top:'10dp',
 		left:'10dp',
 		width:'auto',
-		visible: false
+		visible: false,
+		font:{fontSize:'17dp'}
 	});	
 	
 	bottomLabel = Titanium.UI.createLabel({
 		color: '#000',
 		top: '220dp',
 		width: 'auto',
-		left: '10dp'
+		left: '10dp',
+		font:{fontSize:'17dp'}
 	});
 	
 	self.add(topLabel);
 	self.add(bottomLabel);
 	
-	if (android) {
-		actInd = Titanium.UI.createActivityIndicator({
-			bottom:10, 
-			height:50,
-			width:150
-		});
-	} else {
+	/*if (android) {
 		actInd = Titanium.UI.createActivityIndicator({
 			top:'10dp', 
 			height:'50dp',
-			height:'50dp',
-			width:'auto',
-			style: Titanium.UI.iPhone.ActivityIndicatorStyle.DARK,
-			font: {fontFamily:'Helvetica Neue', fontSize:15,fontWeight:'bold'},
-			color: 'black',
-			message: 'Searching for hunts...'
+			width:'250dp'
 		});
-	}
+	} else {*/
+		actInd = Titanium.UI.createActivityIndicator({
+			height:'50dp',
+			width:Ti.UI.SIZE,
+			style: (android) ? Titanium.UI.ActivityIndicatorStyle.DARK : Titanium.UI.iPhone.ActivityIndicatorStyle.DARK,
+			font: {fontFamily:'Helvetica Neue', fontSize:'15dp',fontWeight:'bold'},
+			color: '#444444',
+			message: ' Searching for hunts...'
+		});
+	//}
 	
 	huntPicker = Titanium.UI.createPicker({
 		top:0,
@@ -129,7 +129,7 @@ function SetupSelectHuntWindow()
 	
 	self.add(actInd);
 	actInd.show();
-	if (android) actInd.message = "Searching for hunts...";
+	//if (android) actInd.message = "Searching for hunts...";
 	Ti.App.addEventListener("GotHunts", RefreshHuntPicker);
 	db.getAvailableHunts();
 }
