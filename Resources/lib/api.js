@@ -168,14 +168,32 @@ exports.uploadImage = function(huntid, finalClueOnlineId, imageData, retryOnFail
 	var authenticate = require('lib/authenticate');
 	var username = authenticate.getUserName();
 	var hashedPassword = authenticate.getHashedPassword();
-	var url = baseURL + "/UploadImage?clueID=" + finalClueOnlineId + "&fileExtension=png&username=" + username + "&password=" + hashedPassword;
+	var fileExtension;
+	switch(true){
+		case (imageData.mimeType.indexOf('bmp') > -1 || imageData.mimeType.indexOf('bitmap') > -1):
+			fileExtension = 'bmp';
+			break;
+		case (imageData.mimeType.indexOf('gif') > -1):
+			fileExtension = 'gif';
+			break;
+		case (imageData.mimeType.indexOf('jpeg') > -1):
+			fileExtension = 'jpg';
+			break;
+		case (imageData.mimeType.indexOf('png') > -1):
+			fileExtension = 'png';
+			break;
+		case (imageData.mimeType.indexOf('tiff') > -1):
+			fileExtension = 'tif';
+			break;
+	}
+	var url = baseURL + "/UploadImage?clueID=" + finalClueOnlineId + "&fileExtension=" + fileExtension + "&username=" + username + "&password=" + hashedPassword;
 	Ti.API.info("api.getAvailableHunts: " + url);
 	xhr.open('POST', url);
-	if (android) {
+	/*if (android) {
 		xhr.setRequestHeader("Content-Type", "multipart/form-data");		
-	} else {
+	} else {*/
 		xhr.setRequestHeader("Content-Type", "text/plain");
-	}
+	//}
 	//xhr.setRequestHeader("enctype", "multipart/form-data");
     //xhr.setRequestHeader("Content-Type", "image/png");
 	//xhr.setRequestHeader("Content-Length", imageData.size);
