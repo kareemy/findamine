@@ -10,5 +10,8 @@ var tablet = Ti.Platform.osname === 'ipad' ||
 var android = Ti.Platform.osname === 'android';
 var iPhone = Ti.Platform.osname === 'iphone';
 var iPad = Ti.Platform.osname === 'ipad';
+var iOS = (iPhone || iPad);
 // FIXME: Remove this for production
 var debug = false;
+//debug must also be true for this to work (used for testing image uploads)
+var ignoreGPSDistanceOnAnswer = false;

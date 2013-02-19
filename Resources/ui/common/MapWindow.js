@@ -104,8 +104,8 @@ function fireUpTheCamera() {
 	
 		success:function(event)
 		{
-			var image = event.media;
-			var cropRect = event.cropRect;
+			var image = (android) ? event.media.file.read() : event.media;
+			//var cropRect = event.cropRect;
 			Ti.API.info('fireUpTheCamera(): Successfully took picture. Our type was: '+event.mediaType);
 			if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
 			{
@@ -114,15 +114,20 @@ function fireUpTheCamera() {
 				Ti.API.info("Picture size: " + image.width + "x" + image.height);
 				var resizedImage;
 				
-				if (android) {
+				/*if (android) {
 					var maxsize = Math.max(cropRect.width, cropRect.height);
 					var multiplier = (maxsize / 400) + 1;
 					resizedImage = Ti.UI.createImageView({image:image,height:cropRect.height / multiplier,width:cropRect.width / multiplier,canScale:true}).toImage();
-				} else {
-					var maxsize = Math.max(image.width, image.height);
-					var multiplier = (maxsize / 400) + 1;
-					resizedImage = image.imageAsResized(image.width / multiplier, image.height / multiplier);
-				}
+				} else {*/
+					var multiplier = 1;
+					if(image.height > image.width && image.height > 400)
+						multiplier = 400 / image.height;
+					else if(image.height < image.width && image.width > 400)
+						multiplier = 400 / image.width;
+					//var maxsize = Math.max(image.width, image.height);
+					//var multiplier = (maxsize / 400) + 1;
+					resizedImage = image.imageAsResized(image.width * multiplier, image.height * multiplier);
+				//}
 				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
 				//Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
 				currentClue = -1;
@@ -254,7 +259,7 @@ function updateMapWindow() {
 		}
 		var d = distance(clue.latitude, clue.longitude, currentLocation.latitude, currentLocation.longitude);
 		Ti.API.info("Found it clicked: Distance from clue ", d);
-		if (d < 100) {
+		if (d < 100 || (debug && ignoreGPSDistanceOnAnswer)) {
 			// Found it
 			var newClue; 
 			if (db.isLastClue(clue.id, clue.huntid)) {

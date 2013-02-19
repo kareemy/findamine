@@ -11,6 +11,8 @@ function ForceHuntRefresh()
 {
 	var db = require('lib/database');
 	huntPicker.hide();
+	bottomLabel.hide();
+	topLabel.hide();
 	actInd.show();
 	db.getAvailableHunts();
 }
@@ -25,26 +27,24 @@ function RefreshHuntPicker(e)
 	var activeHunt = db.getActiveHunt();
 	if (hunts.length == 0) {
 		actInd.hide();
-		bottomLabel.hide();
 		topLabel.text = "Sorry no hunts available. Please check back later.";
 		topLabel.show();
 		if (e.error != 0) {
 			alert("There was an error trying to retrieve the hunts. Please try again later.")
 		}
 		return;
-	} 
-	
-	if (!android) {
-		if (huntPicker.columns[0]) {
-			var _col = huntPicker.columns[0];
-			var len = _col.rowCount;
-			for (var x = len-1; x >= 0; x--) {
-				var _row = _col.rows[x];
-				_col.removeRow(_row);
-			}
+	}
+	//Remove all existing rows from picker
+	if (huntPicker.columns[0]) {
+		var _col = huntPicker.columns[0];
+		var len = _col.rowCount;
+		for (var x = len-1; x >= 0; x--) {
+			var _row = _col.rows[x];
+			_col.removeRow(_row);
 		}
 	}
 	
+	//Add new rows to picker
 	var activeRow = 0;
 	for (var i = 0; i < hunts.length; i++) {
 		var row = Ti.UI.createPickerRow({
@@ -57,13 +57,13 @@ function RefreshHuntPicker(e)
 		if (hunts[i]['id'] == activeHunt) activeRow = i;
 	}
 	
-	huntPicker.selectionIndicator = true;
+	//Set selected row to activeHunt
 	huntPicker.setSelectedRow(0,activeRow,true);
+	if(iOS) huntPicker.setSelectionIndicator(true);
+	actInd.hide();
 	bottomLabel.text = "Selected Hunt: " + hunts[activeRow]['description'] + "\nEnds: " + hunts[activeRow]['endtime'] + "\n\nSwitch to the Map tab to start this hunt.";
 	bottomLabel.show();
 	db.setActiveHunt(hunts[activeRow]['id']);
-	
-	actInd.hide();
 	huntPicker.show();
 }
 
@@ -116,7 +116,7 @@ function SetupSelectHuntWindow()
 	//}
 	
 	huntPicker = Titanium.UI.createPicker({
-		top:0,
+		top:(android) ? '40dp' : 0,
 		visible: false
 	});
 	self.add(huntPicker);
