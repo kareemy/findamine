@@ -46,5 +46,6 @@
         <theme>default</theme>
     </mobileweb>
     <modules/>
+    <property name="ti.android.google.map.api.key">0RHK-6dzuZ6kxgvI-Rc-THYaUbjSaW9AYOCtKCA</property>
     <property name="ti.android.bug2373.finishfalseroot" type="bool">true</property>
 </ti:app>
