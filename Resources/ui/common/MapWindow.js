@@ -102,34 +102,37 @@ function updateResearchQuestions()
 function fireUpTheCamera() {
 	Titanium.Media.showCamera({
 	
-		success:function(event)
-		{
-			var image = (android) ? event.media.file.read() : event.media;
+		success:function(event) {
+			var image = (android && event.media.file && event.media.file.exists()) ? event.media.file.read() : event.media;
 			//var cropRect = event.cropRect;
 			Ti.API.info('fireUpTheCamera(): Successfully took picture. Our type was: '+event.mediaType);
-			if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO)
-			{
-				// FIXME: Verify that camera operation works and it saves image properly
-				Ti.API.info("Got picture. Finishing hunt and saving image");
-				Ti.API.info("Picture size: " + image.width + "x" + image.height);
-				var resizedImage;
-				
-				/*if (android) {
-					var maxsize = Math.max(cropRect.width, cropRect.height);
-					var multiplier = (maxsize / 400) + 1;
-					resizedImage = Ti.UI.createImageView({image:image,height:cropRect.height / multiplier,width:cropRect.width / multiplier,canScale:true}).toImage();
-				} else {*/
-					var multiplier = 1;
-					if(image.height > image.width && image.height > 400)
-						multiplier = 400 / image.height;
-					else if(image.height < image.width && image.width > 400)
-						multiplier = 400 / image.width;
-					//var maxsize = Math.max(image.width, image.height);
-					//var multiplier = (maxsize / 400) + 1;
-					resizedImage = image.imageAsResized(image.width * multiplier, image.height * multiplier);
-				//}
-				Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
-				//Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
+			if(event.mediaType == Ti.Media.MEDIA_TYPE_PHOTO) {
+				if(image) {
+					// FIXME: Verify that camera operation works and it saves image properly
+					Ti.API.info("Got picture. Finishing hunt and saving image");
+					Ti.API.info("Picture size: " + image.width + "x" + image.height);
+					
+					/*if (android) {
+						var maxsize = Math.max(cropRect.width, cropRect.height);
+						var multiplier = (maxsize / 400) + 1;
+						resizedImage = Ti.UI.createImageView({image:image,height:cropRect.height / multiplier,width:cropRect.width / multiplier,canScale:true}).toImage();
+					} else {*/
+						var multiplier = 1;
+						if(image.height > image.width && image.height > 400)
+							multiplier = 400 / image.height;
+						else if(image.height < image.width && image.width > 400)
+							multiplier = 400 / image.width;
+						//var maxsize = Math.max(image.width, image.height);
+						//var multiplier = (maxsize / 400) + 1;
+						var resizedImage = image.imageAsResized(image.width * multiplier, image.height * multiplier);
+					//}
+					Ti.API.info("fireUpTheCamera(): Finishing hunt. huntId: " + clue.huntid + " clueOnlineId: " + clue.OnlineId);
+					//Ti.API.info("Resized picture size: " + resizedImage.width + "x" + resizedImage.height);
+				}
+				else {
+					var resizedImage = null;
+					alert("Error obtaining image from camera. Please report this.");
+				}
 				currentClue = -1;
 				db.finishClue(clue.id);
 				db.uploadClueData(clue.id, true);
@@ -138,26 +141,14 @@ function fireUpTheCamera() {
 				clueLabel.text = "Please select a new hunt.";
 				tabGroup.setActiveTab(0);
 				Ti.App.fireEvent('forceHuntRefresh');
-				// Go back to SelectHunt tab
-				/*
-				var imageView = Ti.UI.createImageView({
-					width:self.width,
-					height:self.height,
-					image:event.media
-				});
-				self.add(imageView);
-				*/
 			}
-			else
-			{
+			else{
 				alert("Camera had an error taking the picture. Please report this.");
 			}
 		},
-		cancel:function()
-		{
+		cancel:function(){
 		},
-		error:function(error)
-		{
+		error:function(error){
 			// create alert
 			var a = Titanium.UI.createAlertDialog({title:'Camera'});
 	
